@@ -16,7 +16,7 @@ def basic_consume_loop(consumer, topics):
         print('subscribed')
         sys.stdout.flush()
         while running:
-            msg = consumer.poll()
+            msg = consumer.poll(1.0)
             print('polled')
             sys.stdout.flush()
             if msg is None: continue

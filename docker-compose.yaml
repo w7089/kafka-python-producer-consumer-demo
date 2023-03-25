@@ -23,8 +23,7 @@ services:
       - '9092:9092'
       - '29092:29092'
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CREATE_TOPICS=my-topic:1:1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181      
       - KAFKA_BROKER_ID=1
       - ALLOW_PLAINTEXT_LISTENER=yes # not recommended for production
     depends_on:
@@ -44,8 +43,6 @@ services:
     build: ./producer
     ports:
       - '8000:8000'
-    environment:
-      - KAFKA_SERVERS=kafka:9092
     depends_on: 
       kafka:
         condition: service_healthy
@@ -53,12 +50,7 @@ services:
       - kafka-net
 
   consumer:
-    build: ./consumer
-    environment:
-      - KAFKA_SERVERS=kafka:9092
-    depends_on: 
-      kafka:
-        condition: service_healthy
+    build: ./consumer    
     networks:
       - kafka-net
 
