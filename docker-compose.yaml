@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - kafka-net
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CREATE_TOPICS=my-topic:1:1
+      - KAFKA_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-net
+
+  producer:
+    build: ./producer
+    ports:
+      - '8000:8000'
+    environment:
+      - KAFKA_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net
+
+  consumer:
+    build: ./consumer
+    environment:
+      - KAFKA_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net
+
+networks:
+  kafka-net:
